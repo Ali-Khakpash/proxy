@@ -10,8 +10,9 @@
 
 // ==== تنظیمات: قبل از دیپلوی همین دو خط را چک/ویرایش کنید ====
 const UPSTREAM_BASE = 'https://generativelanguage.googleapis.com/v1beta';
-// برای Gemini همین مقدار بالا درست است. برای OpenAI به جایش بگذارید:
-//   const UPSTREAM_BASE = 'https://api.openai.com/v1';
+// برای Gemini همین مقدار بالا درست است. برای OpenAI یا Groq به جایش بگذارید:
+//   const UPSTREAM_BASE = 'https://api.openai.com/v1';           // OpenAI
+//   const UPSTREAM_BASE = 'https://api.groq.com/openai/v1';      // Groq
 
 const RELAY_SECRET = ''; // خالی = بدون محافظت (هرکس آدرس را پیدا کند می‌تواند استفاده کند).
 // برای محافظت، یک رشته‌ی دلخواه اینجا بگذارید، مثلاً: 'a9f3-k7m2-x1qz'
@@ -58,8 +59,19 @@ module.exports = async function handler(req, res) {
 
   // req.url شامل مسیر کامل درخواست است (مثلاً /api/models/gemini-3.6-flash:generateContent?...).
   // چون فایل زیر api/ است، فقط همین پیشوند ثابت را برمی‌داریم تا بقیه‌ی مسیر به UPSTREAM_BASE اضافه شود.
-  const path = req.url.replace(/^\/api/, '');
-  const targetUrl = UPSTREAM_BASE.replace(/\/$/, '') + path;
+  const [rawPath, rawQuery] = req.url.replace(/^\/api/, '').split('?');
+
+  // برای مسیریابی این فایل پویا (api/[...path].js)، خودِ Vercel یک پارامتر داخلی
+  // به query string اضافه می‌کند که مقدارش همان بخش پویای مسیر است (کلیدش هم
+  // می‌تواند "path" باشد و هم به‌صورت خام "...path"، بسته به نسخه‌ی روتینگ Vercel).
+  // این پارامتر فقط برای خود Vercel است و نباید به سرویس مقصد فوروارد شود، وگرنه
+  // Gemini/OpenAI/Groq آن را پارامتر ناشناخته حساب کرده و خطای ۴۰۰ می‌دهند.
+  const qs = new URLSearchParams(rawQuery || '');
+  qs.delete('path');
+  qs.delete('...path');
+  const cleanQuery = qs.toString();
+
+  const targetUrl = UPSTREAM_BASE.replace(/\/$/, '') + rawPath + (cleanQuery ? '?' + cleanQuery : '');
 
   const headers = {};
   for (const [key, value] of Object.entries(req.headers)) {
