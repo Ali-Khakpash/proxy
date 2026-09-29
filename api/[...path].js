@@ -8,7 +8,7 @@
  *   https://your-project.vercel.app/api
  */
 
-// ==== تنظیمات: قبل از دیپلوی همین دو خط را چک/ویرایش کنید ====
+// ==== تنظیما: قبل از دیپلوی همین دو خط را چک/ویرایش کنید ====
 const UPSTREAM_BASE = 'https://generativelanguage.googleapis.com/v1beta';
 // برای Gemini همین مقدار بالا درست است. برای OpenAI یا Groq به جایش بگذارید:
 //   const UPSTREAM_BASE = 'https://api.openai.com/v1';           // OpenAI
