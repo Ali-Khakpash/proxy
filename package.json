@@ -1,0 +1,7 @@
+{
+  "name": "ai-advisor-relay",
+  "private": true,
+  "engines": {
+    "node": "20.x"
+  }
+}
